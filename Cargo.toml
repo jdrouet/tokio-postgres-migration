@@ -1,0 +1,20 @@
+[package]
+name = "tokio-postgres-migration"
+description = "Library to help you run migrations"
+keywords = ["postgres", "postgresql", "migration", "sql", "async"]
+categories = ["database"]
+license = "MIT/Apache-2.0"
+repository = "https://github.com/jdrouet/tokio-postgres-migration"
+version = "0.1.0"
+authors = ["Jérémie Drouet <jeremie.drouet@gmail.com>"]
+edition = "2018"
+readme = "./readme.md"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+log = { version = "^0.4" }
+tokio-postgres = { version = "^0.7" }
+
+[dev-dependencies]
+tokio = { features = ["full"], version = "^1.5" }
