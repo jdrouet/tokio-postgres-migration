@@ -1,4 +1,4 @@
-use tokio_postgres::GenericClient;
+use tokio_postgres::Client;
 
 pub struct Migration {
     tablename: String,
@@ -9,19 +9,18 @@ impl Migration {
         Self { tablename }
     }
 
-    async fn execute_script<C: GenericClient>(
+    async fn execute_script(
         &self,
-        client: &C,
+        client: &Client,
         content: &str,
     ) -> Result<(), tokio_postgres::Error> {
-        let stmt = client.prepare(content).await?;
-        client.execute(&stmt, &[]).await?;
+        client.batch_execute(content).await?;
         Ok(())
     }
 
-    async fn insert_migration<C: GenericClient>(
+    async fn insert_migration(
         &self,
-        client: &C,
+        client: &Client,
         name: &str,
     ) -> Result<(), tokio_postgres::Error> {
         let query = format!("INSERT INTO {} (name) VALUES ($1)", self.tablename);
@@ -30,9 +29,9 @@ impl Migration {
         Ok(())
     }
 
-    async fn delete_migration<C: GenericClient>(
+    async fn delete_migration(
         &self,
-        client: &C,
+        client: &Client,
         name: &str,
     ) -> Result<(), tokio_postgres::Error> {
         let query = format!("DELETE FROM {} WHERE name = $1", self.tablename);
@@ -41,9 +40,9 @@ impl Migration {
         Ok(())
     }
 
-    async fn create_table<C: GenericClient>(
+    async fn create_table(
         &self,
-        client: &C,
+        client: &Client,
     ) -> Result<(), tokio_postgres::Error> {
         log::debug!("creating migration table {}", self.tablename);
         let query = format!(
@@ -54,9 +53,9 @@ impl Migration {
         Ok(())
     }
 
-    async fn exists<C: GenericClient>(
+    async fn exists(
         &self,
-        client: &C,
+        client: &Client,
         name: &str,
     ) -> Result<bool, tokio_postgres::Error> {
         log::trace!("check if migration {} exists", name);
@@ -69,9 +68,9 @@ impl Migration {
     }
 
     /// Migrate all scripts up
-    pub async fn up<C: GenericClient>(
+    pub async fn up(
         &self,
-        client: &mut C,
+        client: &mut Client,
         scripts: &[(&str, &str)],
     ) -> Result<(), tokio_postgres::Error> {
         log::info!("migrating up to {}", self.tablename);
@@ -87,9 +86,9 @@ impl Migration {
     }
 
     /// Migrate all scripts down
-    pub async fn down<C: GenericClient>(
+    pub async fn down(
         &self,
-        client: &C,
+        client: &Client,
         scripts: &[(&str, &str)],
     ) -> Result<(), tokio_postgres::Error> {
         log::info!("migrating down to {}", self.tablename);
